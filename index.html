@@ -164,7 +164,7 @@
     }
     /*透過YQL取得氣象資料*/
     var GetWeatherData = function (cityId) {
-        var BasicQueryUrl = 'http://query.yahooapis.com/v1/public/yql?'
+        var BasicQueryUrl = 'https://query.yahooapis.com/v1/public/yql?'
         var query = 'q=' +
             encodeURIComponent('select * from html where ' +
             '  url = "http://www.cwb.gov.tw/V7/forecast/f_index.htm" and ' +
