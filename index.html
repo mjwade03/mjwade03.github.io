@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>YQL-擷取中央氣象局範例</title>
+</head>
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+<script>
+    var jsonCity = {
+        "results": {
+            "table": [
+            {
+                "city": {
+                    "id": "KeelungList",
+                    "name": "基隆市"
+                }
+            },
+            {
+                "city": {
+                    "id": "TaipeiCityList",
+                    "name": "臺北市"
+                }
+            },
+            {
+                "city": {
+                    "id": "TaipeiList",
+                    "name": "新北市"
+                }
+            },
+            {
+                "city": {
+                    "id": "TaoyuanList",
+                    "name": "桃園縣"
+                }
+            },
+            {
+                "city": {
+                    "id": "HsinchuCityList",
+                    "name": "新竹市"
+                }
+            },
+            {
+                "city": {
+                    "id": "HsinchuList",
+                    "name": "新竹縣"
+                }
+            },
+            {
+                "city": {
+                    "id": "MiaoliList",
+                    "name": "苗栗縣"
+                }
+            },
+            {
+                "city": {
+                    "id": "TaichungList",
+                    "name": "臺中市"
+                }
+            },
+            {
+                "city": {
+                    "id": "ChanghuaList",
+                    "name": "彰化縣"
+                }
+            },
+            {
+                "city": {
+                    "id": "NantouList",
+                    "name": "南投縣"
+                }
+            },
+            {
+                "city": {
+                    "id": "YunlinList",
+                    "name": "雲林縣"
+                }
+            },
+            {
+                "city": {
+                    "id": "ChiayiCityList",
+                    "name": "嘉義市"
+                }
+            },
+            {
+                "city": {
+                    "id": "ChiayiList",
+                    "name": "嘉義縣"
+                }
+            },
+            {
+                "city": {
+                    "id": "YilanList",
+                    "name": "宜蘭縣"
+                }
+            },
+            {
+                "city": {
+                    "id": "HualienList",
+                    "name": "花蓮縣"
+                }
+            },
+            {
+                "city": {
+                    "id": "TaitungList",
+                    "name": "臺東縣"
+                }
+            },
+            {
+                "city": {
+                    "id": "TainanList",
+                    "name": "臺南市"
+                }
+            },
+            {
+                "city": {
+                    "id": "KaohsiungCityList",
+                    "name": "高雄市"
+                }
+            },
+            {
+                "city": {
+                    "id": "PingtungList",
+                    "name": "屏東縣"
+                }
+            },
+            {
+                "city": {
+                    "id": "MatsuList",
+                    "name": "連江縣"
+                }
+            },
+            {
+                "city": {
+                    "id": "KinmenList",
+                    "name": "金門縣"
+                }
+            },
+            {
+                "city": {
+                    "id": "PenghuList",
+                    "name": "澎湖縣"
+                }
+            }
+            ]
+        }
+    };
+</script>
+<script>
+    /*下拉縣市清單*/
+    var appendSelectCity = function () {
+        $.each(jsonCity.results.table, function (i, item) {
+            $("#city").append('<option id="' + item.city.id + '">' + item.city.name + '</option>');
+        });
+    }
+    /*下拉觸發事件*/
+    var changSel = function (ele) {
+        //
+        var Cityid = $(ele).find("option:selected").attr('id');
+        if ($('table>td').length == 4) {
+            $('table>td').fadeOut(500, function () { $(this).remove(); });
+            GetWeatherData(Cityid);
+        }
+    }
+    /*透過YQL取得氣象資料*/
+    var GetWeatherData = function (cityId) {
+        var BasicQueryUrl = 'http://query.yahooapis.com/v1/public/yql?'
+        var query = 'q=' +
+            encodeURIComponent('select * from html where ' +
+            '  url = "http://www.cwb.gov.tw/V7/forecast/f_index.htm" and ' +
+            'xpath=' + "'" + '//tr[@id="' + cityId + '"]' + "'") + '&format=json';
+
+        $.getJSON(BasicQueryUrl + query, function (data) {
+            var Infohtml = '';
+            var ImagUrl = '';
+            //取得圖片,在最後一個元素
+            var lastImglength = data.query.results.tr.td.length - 1;
+            $.each(data.query.results.tr.td, function (i, val) {
+                if (val.a.content != undefined) {
+                    var name = '';
+                    switch (i) {
+                        case 0:
+                            name = "縣市";
+                            break;
+                        case 1:
+                            name = "溫度";
+                            break;
+                        case 2:
+                            name = "降雨機率";
+                            break;
+                    }
+                    Infohtml += '<td width="100px;"><p>' + name + '</p>' + val.a.content + '</td>';
+                }
+            });
+            var iurl = data.query.results.tr.td[lastImglength].div.a.img.src;
+            ImagUrl += ' <td width="100px;">' +
+                    ' <div class="spic">' +
+                    ' <img src="http://www.cwb.gov.tw' + iurl + '" width="45" height="45" border="0">' +
+                    ' </div>' +
+                    ' </td>';
+            $("table").append(Infohtml + ImagUrl);
+        });
+    }
+    $(function () {
+        /*初始化取得*/
+        appendSelectCity();
+        /*預設值*/
+        GetWeatherData('KeelungList');
+    });
+</script>
+<body>
+    <form>
+
+        <p>請選擇地區:</p>
+        <select id="city" onchange="changSel(this)">
+        </select>
+        <table>
+            <!-- 放置內容區域-->
+        </table>
+    </form>
+
+</body>
+</html>
